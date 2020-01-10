@@ -27,7 +27,7 @@ plugin_author = "Eyal"
 plugin_author_email = "eyal0@github.com"
 
 # The plugin's homepage URL. Can be overwritten within OctoPrint's internal data via __plugin_url__ in the plugin module
-plugin_url = "https://github.com/eyal0/OctoPrint-PrintTimeGenius"
+plugin_url = "https://github.com/ShohninDmitriy/OctoPrint-PrintTimeGenius"
 
 # The plugin's license. Can be overwritten within OctoPrint's internal data via __plugin_license__ in the plugin module
 plugin_license = "AGPLv3"
