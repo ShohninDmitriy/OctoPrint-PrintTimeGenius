@@ -10,8 +10,8 @@ license: AGPLv3
 date: 2018-07-12
 
 homepage: https://github.com/eyal0/OctoPrint-PrintTimeGenius
-source: https://github.com/eyal0/OctoPrint-PrintTimeGenius
-archive: https://github.com/eyal0/OctoPrint-PrintTimeGenius/archive/master.zip
+source: https://github.com/ShohninDmitriy/OctoPrint-PrintTimeGenius
+archive: https://github.com/ShohninDmitriy/OctoPrint-PrintTimeGenius/archive/master.zip
 
 follow_dependency_links: false
 
