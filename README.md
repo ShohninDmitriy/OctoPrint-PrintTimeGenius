@@ -13,7 +13,7 @@ In the chart, we see that the print time remaining is never off by more than 3 m
 Install via the bundled [Plugin Manager](https://github.com/foosel/OctoPrint/wiki/Plugin:-Plugin-Manager)
 or manually using this URL:
 
-    https://github.com/eyal0/OctoPrint-PrintTimeGenius/archive/master.zip
+    https://github.com/ShohninDmitriy/OctoPrint-PrintTimeGenius/archive/master.zip
 
 ## Configuration
 

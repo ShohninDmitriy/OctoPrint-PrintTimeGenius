@@ -665,12 +665,12 @@ class PrintTimeGeniusPlugin(octoprint.plugin.SettingsPlugin,
 
 	    # version check: github repository
 	    type="github_release",
-	    user="eyal0",
+	    user="ShohninDmitriy",
 	    repo="OctoPrint-PrintTimeGenius",
 	    current=self._plugin_version,
 
 	    # update method: pip
-	    pip="https://github.com/eyal0/OctoPrint-PrintTimeGenius/archive/{target_version}.zip"
+	    pip="https://github.com/ShohninDmitriy/OctoPrint-PrintTimeGenius/archive/{target_version}.zip"
 	)
     )
 
