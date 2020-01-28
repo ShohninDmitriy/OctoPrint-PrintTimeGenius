@@ -43,7 +43,7 @@ $(function() {
     };
     self.printerStateViewModel.printTimeLeftOriginString =
         self.printerStateViewModel.printTimeLeftOriginString.extend({
-          addGenius: gettext("Based on a line-by-line preprocessing of the gcode (good accuracy)")});
+          addGenius: gettext("На основе построчной предварительной обработки кода (хорошая точность)")});
 
     // Overwrite the printTimeLeftOriginClass function
     self.originalPrintTimeLeftOriginClass = self.printerStateViewModel.printTimeLeftOriginClass;

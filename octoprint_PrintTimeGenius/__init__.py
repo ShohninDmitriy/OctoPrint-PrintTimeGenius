@@ -404,15 +404,15 @@ class PrintTimeGeniusPlugin(octoprint.plugin.SettingsPlugin,
   def get_settings_defaults(self):
     current_path = os.path.dirname(os.path.realpath(__file__))
     built_in_analyzers = [
-        (gettext("All gcode analyzers (usually not as good as marlin-calc)"),
+        (gettext("Все анализаторы кода (обычно не так хороши, как marlin-calc)"),
          '"{{python}}" "{analyzer}" "{{{{gcode}}}}"'.format(
              analyzer=os.path.join(current_path, "analyzers/analyze_gcode_comments.py")),
          False),
-        (gettext("Marlin firmware simulation (replaces Octoprint built-in, faster and more accurate)"),
+        (gettext("Marlin firmware симулятор (заменяет Octoprint встроенный, быстрее и точнее)"),
          '"{{python}}" "{analyzer}" marlin-calc "{{{{gcode}}}}" "{{{{mcodes}}}}"'.format(
              analyzer=os.path.join(current_path, "analyzers/analyze_progress.py")),
          True),
-        (gettext("Use Slic3r PE M73 time remaining"),
+        (gettext("Использовать оставшееся время М73"),
          '"{{python}}" "{analyzer}" "{{{{gcode}}}}" --parsers slic3r_pe_print_time slic3r_pe_print_time_remaining'.format(
              analyzer=os.path.join(current_path, "analyzers/analyze_gcode_comments.py")),
          False),
