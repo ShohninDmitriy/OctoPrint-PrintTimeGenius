@@ -6,11 +6,11 @@
     <label title="{{ _('Анализ файла во время нагрева не должен влиять на производительность.') }}"
            class="checkbox"><input
                               type="checkbox"
-                              data-bind="checked: allowAnalysisWhileHeating">{{ _('Разрешить анализ во время нагрева (вступает в силу после сохранения)') }}</label>
+                              data-bind="checked: allowAnalysisWhileHeating">{{ _('Разрешить анализ во время нагрева (вступает в силу только после сохранения)') }}</label>
     <label title="{{ _('Анализ файла во время печати может привести к снижению производительности печати.') }}"
            class="checkbox"><input
                               type="checkbox"
-                              data-bind="checked: allowAnalysisWhilePrinting">{{ _('Разрешить анализ во время печати (вступает в силу после сохранения)') }}<span class="label label-important">{{ _('May slow down your printer') }}</span></label>
+                              data-bind="checked: allowAnalysisWhilePrinting">{{ _('Разрешить анализ во время печати (вступает в силу только после сохранения)') }}<span class="label label-important">{{ _('May slow down your printer') }}</span></label>
     <h3>{{ _('Анализаторы') }}</h3>
     <!-- ko foreach: analyzers -->
       <label class="checkbox">
@@ -90,8 +90,8 @@
           </ol>
         </p>
         <p>
-          Теперь напечатайте что-нибудь, и журнал заполнится <a href="https://en.wikipedia.org/wiki/Comma-separated_values">csv</a>.
-          <a href="downloads/logs/plugin_PrintTimeGenius_engine.log">Скачать журнал</a>, удалите ненужные строки и импортируйте их в электронную таблицу.
+          Now print something and the log will fill with a <a href="https://en.wikipedia.org/wiki/Comma-separated_values">csv</a>.
+          <a href="downloads/logs/plugin_PrintTimeGenius_engine.log">Download the log</a>, remove unnecessary lines, and import to a spreadsheet.
         </p>') }}
         <h3>{{ _('Значения компенсации') }}</h3>
         <table class="print-time-genius-table" style="border: 2px solid black;">
@@ -141,7 +141,7 @@
                              _.has($data, 'compensatedPrintTime') ?
                              compensatedPrintTime().toFixed(1) : ''"></td>
               <td>
-                <a title="{{ _('Удалите строку, если этот образец и не должен использоваться для будущей компенсации') }}" class="btn btn-danger" data-bind="click: $parent.removePrintHistoryRow"><i class="fa fa-trash-o"></i></a>
+                <a title="{{ _('Удалите строку, если это нетипичный образец и не должен использоваться для будущей компенсации') }}" class="btn btn-danger" data-bind="click: $parent.removePrintHistoryRow"><i class="fa fa-trash-o"></i></a>
               </td>
             </tr>
           </tbody>
