@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: OctoPrint-PrintTimeGenius 1.3\n"
 "Report-Msgid-Bugs-To: i18n@octoprint.org\n"
 "POT-Creation-Date: 2018-10-22 13:10-0400\n"
-"PO-Revision-Date: 2020-01-29 10:11+0300\n"
+"PO-Revision-Date: 2020-01-29 10:17+0300\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -58,8 +58,7 @@ msgstr "Анализ файла при нагреве не должен влия
 
 #: octoprint_PrintTimeGenius/templates/PrintTimeGenius_settings.jinja2:9
 msgid "Allow analysis while heating (only takes effect after saving)"
-msgstr ""
-"Разрешить анализ во время нагрева (вступает в силу только после сохранения)"
+msgstr "Разрешить анализ во время нагрева (вступает в силу после сохранения)"
 
 #: octoprint_PrintTimeGenius/templates/PrintTimeGenius_settings.jinja2:10
 msgid "Analyzing a file while printing might cause poor printing performace."
@@ -69,8 +68,7 @@ msgstr ""
 
 #: octoprint_PrintTimeGenius/templates/PrintTimeGenius_settings.jinja2:13
 msgid "Allow analysis while printing (only takes effect after saving)"
-msgstr ""
-"Разрешить анализ во время печати (вступает в силу только после сохранения)"
+msgstr "Разрешить анализ во время печати (вступает в силу после сохранения)"
 
 #: octoprint_PrintTimeGenius/templates/PrintTimeGenius_settings.jinja2:13
 #: octoprint_PrintTimeGenius/templates/PrintTimeGenius_settings.jinja2:74
