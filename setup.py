@@ -14,7 +14,7 @@ plugin_package = "octoprint_PrintTimeGenius"
 plugin_name = "OctoPrint-PrintTimeGenius"
 
 # The plugin's version. Can be overwritten within OctoPrint's internal data via __plugin_version__ in the plugin module
-plugin_version = "2.2.1_r"
+plugin_version = "2.2.1"
 
 # The plugin's description. Can be overwritten within OctoPrint's internal data via __plugin_description__ in the plugin
 # module
@@ -34,7 +34,10 @@ plugin_license = "AGPLv3"
 
 # Any additional requirements besides OctoPrint should be listed here
 # For now, require the working release, which is only 1.3.9rc1.
-plugin_requires = ["OctoPrint>=1.3.9rc1", "psutil", "logging", "sarge"]
+plugin_requires = ["OctoPrint>=1.3.9rc1", "psutil", "sarge"]
+from sys import version_info
+if version_info[0] < 3:
+    plugin_requires.append("logging")
 
 ### --------------------------------------------------------------------------------------------------------------------
 ### More advanced options that you usually shouldn't have to touch follow after this point
