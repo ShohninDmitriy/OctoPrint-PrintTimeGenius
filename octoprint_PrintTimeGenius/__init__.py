@@ -69,14 +69,15 @@ class GeniusEstimator(PrintTimeEstimator):
     self._logger = logger
     self._current_history = current_history
     self._current_progress_index = -1 # Points to the entry that we used for remaining time
-    self._current_total_printTime = None # When we started using the current_progress
     self._called_genius_yet = False
     self.recheck_metadata = True
+    self._progress = None
+    self._metadata = None
 
   def _get_metadata(self):
     try:
       self._metadata = self._file_manager.get_metadata(self._origin, self._path)
-    except octoprint.filemanager.NoSuchStorage as e:
+    except octoprint.filemanager.NoSuchStorage:
       #The metadata is not found or maybe not yet written.
       self._metadata = None
     if not self._metadata or not "analysis" in self._metadata or not "progress" in self._metadata["analysis"]:
@@ -84,7 +85,7 @@ class GeniusEstimator(PrintTimeEstimator):
     else:
       self._progress = self._metadata["analysis"]["progress"]
 
-  def _genius_estimate(self, progress, printTime, cleanedPrintTime, statisticalTotalPrintTime, statisticalTotalPrintTimeType):
+  def _genius_estimate(self, progress, printTime, unused_cleanedPrintTime, unused_statisticalTotalPrintTime, unused_statisticalTotalPrintTimeType):
     """Return an estimate for the total print time remaining.
     Returns (remaining_time_in_seconds, "genius") or None if it failed.
     """
@@ -98,30 +99,35 @@ class GeniusEstimator(PrintTimeEstimator):
       self._called_genius_yet = True
     if self.recheck_metadata:
       self._get_metadata()
-      self.recheck_metadata = False;
+      self.recheck_metadata = False
     if not self._progress:
       return None
-    # Can we increment the current_progress_index?
-    new_progress_index = self._current_progress_index
-    while (new_progress_index + 1 < len(self._progress) and
-           progress >= self._progress[new_progress_index+1][0]):
-      new_progress_index += 1 # Increment
-    if new_progress_index < 0:
+    if printTime is None:
+      # We don't know the printTime so far, only the progress which we want to calculate.
+      return _interpolate_list(self._progress, progress)[1], "genius"
+
+    # If we do have a printTime, we can use it.  Can we
+    # increment/decrement the current_progress_index?  We do this
+    # instead of a binary search because we're usually in the right
+    # place already so this is faster.
+    while (self._current_progress_index + 1 < len(self._progress) and
+           progress >= self._progress[self._current_progress_index+1][0]):
+      self._current_progress_index += 1
+    while (self._current_progress_index > 0 and
+           progress < self._progress[self._current_progress_index][0]):
+      self._current_progress_index -= 1
+    if self._current_progress_index < 0:
       return None # We're not even in range yet.
-    if new_progress_index != self._current_progress_index:
-      # We advanced to a new index, let's make new estimates.
-      if (progress > self._metadata["analysis"]["firstFilament"] and
-          not "firstFilamentPrintTime" in self._current_history):
-        self._current_history["firstFilamentPrintTime"] = printTime
-      if (not "lastFilamentPrintTime" in self._current_history or
-          progress <= self._metadata["analysis"]["lastFilament"]):
-        self._current_history["lastFilamentPrintTime"] = printTime
-      interpolation = _interpolate(progress, self._progress[new_progress_index], self._progress[new_progress_index+1])
-      # This is our best guess for the total print time.
-      self._current_total_printTime = interpolation[1] + printTime
-      self._current_progress_index = new_progress_index
-    remaining_print_time = self._current_total_printTime - printTime
-    return remaining_print_time, "genius"
+    # We advanced to a new index, let's make new estimates.
+    if (not "firstFilamentPrintTime" in self._current_history and
+        progress > self._metadata["analysis"]["firstFilament"]):
+      self._current_history["firstFilamentPrintTime"] = printTime
+    if (not "lastFilamentPrintTime" in self._current_history or
+        progress <= self._metadata["analysis"]["lastFilament"]):
+      self._current_history["lastFilamentPrintTime"] = printTime
+    interpolation = _interpolate(progress, self._progress[self._current_progress_index], self._progress[self._current_progress_index+1])
+    # This is our best guess for the total print time.
+    return interpolation[1], "genius"
 
   def estimate(self, progress, printTime, cleanedPrintTime, statisticalTotalPrintTime, statisticalTotalPrintTimeType):
     try:
@@ -247,10 +253,11 @@ class GeniusAnalysisQueue(GcodeAnalysisQueue):
           ", ".join("{}/{}".format(ph["lastFilamentPrintTime"] - ph["firstFilamentPrintTime"],
                                    ph["analysisLastFilamentPrintTime"] - ph["analysisFirstFilamentPrintTime"])
                     for ph in print_history)))
-      print_time_factor = [(ph["lastFilamentPrintTime"] - ph["firstFilamentPrintTime"]) /
-                           (ph["analysisLastFilamentPrintTime"] - ph["analysisFirstFilamentPrintTime"])
-                           for ph in print_history]
-      average_print_time_factor = sum(print_time_factor) / len(print_time_factor)
+      print_time_numerator = [(ph["lastFilamentPrintTime"] - ph["firstFilamentPrintTime"])
+                              for ph in print_history]
+      print_time_denominator = [(ph["analysisLastFilamentPrintTime"] - ph["analysisFirstFilamentPrintTime"])
+                               for ph in print_history]
+      average_print_time_factor = sum(print_time_numerator) / sum(print_time_denominator)
       logger.info("Average scaling factor: {}".format(average_print_time_factor))
       # Now make a new progress map.
       new_progress = []
@@ -404,29 +411,30 @@ class PrintTimeGeniusPlugin(octoprint.plugin.SettingsPlugin,
   def get_settings_defaults(self):
     current_path = os.path.dirname(os.path.realpath(__file__))
     built_in_analyzers = [
-        (gettext("Все анализаторы кода (обычно не так хороши, как marlin-calc)"),
+        (gettext("All gcode analyzers (usually not as good as marlin-calc)"),
          '"{{python}}" "{analyzer}" "{{{{gcode}}}}"'.format(
              analyzer=os.path.join(current_path, "analyzers/analyze_gcode_comments.py")),
          False),
-        (gettext("Marlin firmware симулятор (заменяет Octoprint встроенный, быстрее и точнее)"),
+        (gettext("Marlin firmware simulation (replaces Octoprint built-in, faster and more accurate)"),
          '"{{python}}" "{analyzer}" marlin-calc "{{{{gcode}}}}" "{{{{mcodes}}}}"'.format(
              analyzer=os.path.join(current_path, "analyzers/analyze_progress.py")),
          True),
-        (gettext("Использовать оставшееся время М73"),
+        (gettext("Use Slic3r PE M73 time remaining"),
          '"{{python}}" "{analyzer}" "{{{{gcode}}}}" --parsers slic3r_pe_print_time slic3r_pe_print_time_remaining'.format(
              analyzer=os.path.join(current_path, "analyzers/analyze_gcode_comments.py")),
          False),
     ]
     return {
-        "analyzers": [
-            {"description": description,
-             "command": command.format(python=sys.executable),
-             "enabled": enabled}
-            for (description, command, enabled) in built_in_analyzers],
-        "exactDurations": True,
-        "enableOctoPrintAnalyzer": False,
-        "allowAnalysisWhilePrinting": False,
-        "allowAnalysisWhileHeating": True,
+      "analyzers": [
+        {"description": description,
+         "command": command.format(python=sys.executable),
+         "enabled": enabled}
+        for (description, command, enabled) in built_in_analyzers],
+      "exactDurations": True,
+      "enableOctoPrintAnalyzer": False,
+      "allowAnalysisWhilePrinting": False,
+      "allowAnalysisWhileHeating": True,
+      "showStars": True,
     }
 
   @octoprint.plugin.BlueprintPlugin.route("/get_settings_defaults", methods=["GET"])
@@ -516,7 +524,7 @@ class PrintTimeGeniusPlugin(octoprint.plugin.SettingsPlugin,
     return ""
 
   def unmark_all_pending(self, dest, all_files):
-    for k, v in all_files.iteritems():
+    for k, v in all_files.items():
       if 'analysis' in v and 'analysisPending' in v['analysis'] and v['analysis']['analysisPending']:
         self._file_manager.set_additional_metadata(dest, v['path'], 'analysis', {'analysisPending': False}, merge=True)
       if 'children' in v:
@@ -649,6 +657,15 @@ class PrintTimeGeniusPlugin(octoprint.plugin.SettingsPlugin,
     if strip_line.startswith("echo:"):
       strip_line = strip_line[len("echo:"):]
     strip_line = strip_line.strip()
+    if strip_line.find("Invalid extruder") >= 0:
+        return line
+    if strip_line.startswith("FR:") and strip_line.endswith("%"):
+      feed_rate = strip_line[len("FR:"):-1]
+      strip_line = "M220 S" + feed_rate
+    elif strip_line.startswith("E") and strip_line[2:9] == " Flow: " and strip_line.endswith("%"):
+      index = strip_line[1]
+      flow = strip_line[9:-1]
+      strip_line = "M221 S" + flow + " T" + index
     self.update_printer_config(strip_line)
     return line
 
